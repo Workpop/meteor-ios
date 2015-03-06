@@ -33,15 +33,20 @@
 }
 
 - (void)signUpWithEmail:(NSString *)email password:(NSString *)password completionHandler:(METLogInCompletionHandler)completionHandler {
-  [self loginWithMethodName:@"createUser" parameters:@[[self parametersForCreateUserMethodFromEmail:email password:password]] completionHandler:^(id result, NSError *error) {
-    if (completionHandler) {
-      completionHandler(error);
-    }
-  }];
+  [self signUpWithEmail:email password:password profile:nil completionHandler:completionHandler];
 }
 
 - (void)signUpWithEmail:(NSString *)email password:(NSString *)password firstName:(NSString *)firstName lastName:(NSString *)lastName completionHandler:(METLogInCompletionHandler)completionHandler {
-  [self loginWithMethodName:@"createUser" parameters:@[[self parametersForCreateUserMethodFromEmail:email password:password firstName:firstName lastName:lastName]] completionHandler:^(id result, NSError *error) {
+  NSMutableDictionary *profile = [NSMutableDictionary dictionary];
+  firstName ? profile[@"first_name"] = firstName : nil;
+  lastName ? profile[@"last_name"] = lastName : nil;
+  
+  [self signUpWithEmail:email password:password profile:profile completionHandler:completionHandler];
+}
+
+- (void)signUpWithEmail:(NSString *)email password:(NSString *)password profile:(NSDictionary *)profile completionHandler:(METLogInCompletionHandler)completionHandler {
+  NSArray *parameters = @[[self parametersForCreateUserMethodFromEmail:email password:password profile:profile]];
+  [self loginWithMethodName:@"createUser" parameters:parameters completionHandler:^(id result, NSError *error) {
     if (completionHandler) {
       completionHandler(error);
     }
@@ -50,23 +55,14 @@
 
 #pragma mark - Helper Methods
 
-- (NSDictionary *)parametersForCreateUserMethodFromEmail:(NSString *)email password:(NSString *)password
-{
-  return [self parametersForCreateUserMethodFromEmail:email password:password firstName:nil lastName:nil];
-}
-
-- (NSDictionary *)parametersForCreateUserMethodFromEmail:(NSString *)email password:(NSString *)password firstName:(NSString *)firstName lastName:(NSString *)lastName {
+- (NSDictionary *)parametersForCreateUserMethodFromEmail:(NSString *)email password:(NSString *)password profile:(NSDictionary *)profile {
   // build the base parameters body with email/password
   NSDictionary *params =  @{@"email": email, @"password": @{@"digest": [password SHA256String], @"algorithm": @"sha-256"}};
   
-  // if we have a firstName or last name, include it include the `profile` object
-  if (firstName || lastName) {
-    NSMutableDictionary *profileParams = [NSMutableDictionary dictionary];
-    firstName ? profileParams[@"first_name"] = firstName : nil;
-    lastName ? profileParams[@"last_name"] = lastName : nil;
-    
+  // if we have a profile object, include it include under the key `profile`
+  if (profile) {
     NSMutableDictionary *mutableParams = [params mutableCopy];
-    mutableParams[@"profile"] = profileParams;
+    mutableParams[@"profile"] = profile;
     params = mutableParams;
   }
   
