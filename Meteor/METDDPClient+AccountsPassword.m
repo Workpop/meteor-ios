@@ -33,11 +33,47 @@
 }
 
 - (void)signUpWithEmail:(NSString *)email password:(NSString *)password completionHandler:(METLogInCompletionHandler)completionHandler {
-  [self loginWithMethodName:@"createUser" parameters:@[@{@"email": email, @"password": @{@"digest": [password SHA256String], @"algorithm": @"sha-256"}}] completionHandler:^(id result, NSError *error){
+  [self loginWithMethodName:@"createUser" parameters:@[[self createUserParametersObjectWithEmail:email password:password]] completionHandler:^(id result, NSError *error) {
     if (completionHandler) {
       completionHandler(error);
     }
   }];
+}
+
+- (void)signUpWithEmail:(NSString *)email password:(NSString *)password firstName:(NSString *)firstName lastName:(NSString *)lastName completionHandler:(METLogInCompletionHandler)completionHandler {
+  [self loginWithMethodName:@"createUser" parameters:@[[self createUserParametersObjectWithEmail:email password:password firstName:firstName lastName:lastName]] completionHandler:^(id result, NSError *error) {
+    if (completionHandler) {
+      completionHandler(error);
+    }
+  }];
+}
+
+- (NSDictionary *)createUserParametersObjectWithEmail:(NSString *)email password:(NSString *)password
+{
+  return [self createUserParametersObjectWithEmail:email password:password firstName:nil lastName:nil];
+}
+
+- (NSDictionary *)createUserParametersObjectWithEmail:(NSString *)email password:(NSString *)password firstName:(NSString *)firstName lastName:(NSString *)lastName {
+  NSDictionary *params =  @{
+                            @"email": email,
+                            @"password": @{@"digest": [password SHA256String], @"algorithm": @"sha-256"}
+                            };
+  
+  if (firstName || lastName) {
+    NSMutableDictionary *profileParams = [NSMutableDictionary dictionary];
+    if (firstName) {
+      profileParams[@"first_name"] = firstName;
+    }
+    if (lastName) {
+      profileParams[@"last_name"] = lastName;
+    }
+    
+    NSMutableDictionary *mutableParams = [params mutableCopy];
+    mutableParams[@"profile"] = profileParams;
+    params = mutableParams;
+  }
+  
+  return params;
 }
 
 @end
