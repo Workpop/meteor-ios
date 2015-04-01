@@ -85,7 +85,10 @@
       methodInvocation.methodName = methodName;
       methodInvocation.parameters = parameters;
       // Setting NSOperation name can be useful for debug purposes
-      methodInvocation.name = parameters ? [NSString stringWithFormat:@"%@(%@)", methodName, parameters] : methodName;
+      // Only available on iOS8
+      if ([methodInvocation respondsToSelector:@selector(setName:)]) {
+        methodInvocation.name = parameters ? [NSString stringWithFormat:@"%@(%@)", methodName, parameters] : methodName;
+      }
       methodInvocation.barrier = options & METMethodCallOptionsBarrier;
       methodInvocation.receivedResultHandler = receivedResultHandler;
       methodInvocation.completionHandler = completionHandler;
