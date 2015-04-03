@@ -132,7 +132,9 @@
 
 - (id)copyWithZone:(NSZone *)zone {
   METMethodInvocation *copy = [[[self class] allocWithZone:zone] init];
-  copy.name = self.name;
+  if ([copy respondsToSelector:@selector(setName:)]) {
+    copy.name = self.name;
+  }
   copy.client = _client;
   copy.methodID = _methodID;
   copy.methodName = _methodName;
