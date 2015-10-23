@@ -55,11 +55,13 @@ NS_INLINE BOOL METShouldLogDDPMessages() {
 }
 
 - (void)open {
-    NSLog(@"Connecting to DDP server at URL: %@", _serverURL);
     
     if (!_request) {
         _request = [[NSMutableURLRequest alloc] initWithURL:_serverURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:_timeoutInterval];
     }
+    
+    NSLog(@"Connecting to DDP server at URL: %@", _request.URL.absoluteString);
+    
     _webSocket = [PSWebSocket clientSocketWithRequest:_request];
     _webSocket.delegate = self;
     [_webSocket open];
