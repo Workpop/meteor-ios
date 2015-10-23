@@ -133,6 +133,10 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
   return [self initWithConnection:[[METDDPConnection alloc] initWithServerURL:serverURL]];
 }
 
+- (instancetype)initWithRequest:(NSURLRequest *)request {
+    return [self initWithConnection:[[METDDPConnection alloc] initWithRequest:request]];
+}
+
 - (void)dealloc {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
@@ -140,9 +144,12 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 #pragma mark - Application State Notifications
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
+    NSLog(@"did enter background");
+    
   _keepAliveBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"com.meteor.keep-alive" expirationHandler:^{
+      [[UIApplication sharedApplication] endBackgroundTask:_keepAliveBackgroundTask];
     _keepAliveBackgroundTask = UIBackgroundTaskInvalid;
-    [self disconnect];
+      [self disconnect];
   }];
 }
 
@@ -693,6 +700,7 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     NSLog(@"No reason specified in DDP error response");
     reason = error;
   }
+    
   
   return [NSError errorWithDomain:METDDPErrorDomain code:METDDPServerError userInfo:@{NSLocalizedDescriptionKey: @"Received error response from server", NSLocalizedFailureReasonErrorKey: reason}];
 }

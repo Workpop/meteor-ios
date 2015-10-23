@@ -54,6 +54,7 @@ typedef void (^METLogOutCompletionHandler)(NSError *error);
 
 - (instancetype)initWithConnection:(METDDPConnection *)connection;
 - (instancetype)initWithServerURL:(NSURL *)serverURL;
+- (instancetype)initWithRequest:(NSURLRequest *)request;
 
 @property(weak, nonatomic) id<METDDPClientDelegate> delegate;
 

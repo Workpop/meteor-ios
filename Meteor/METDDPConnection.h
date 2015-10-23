@@ -26,9 +26,11 @@
 
 @interface METDDPConnection : NSObject<PSWebSocketDelegate>
 
-- (instancetype)initWithServerURL:(NSURL *)serverURL NS_DESIGNATED_INITIALIZER;;
+- (instancetype)initWithRequest:(NSURLRequest *)request NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithServerURL:(NSURL *)serverURL NS_DESIGNATED_INITIALIZER;
 @property (strong, nonatomic, readonly) NSURL *serverURL;
 @property (assign, nonatomic, readonly) NSTimeInterval timeoutInterval;
+@property (strong, nonatomic, readonly) NSURLRequest *request;
 
 @property (weak, nonatomic) id<METDDPConnectionDelegate> delegate;
 @property (strong, nonatomic) dispatch_queue_t delegateQueue;

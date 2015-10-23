@@ -37,6 +37,14 @@ NS_INLINE BOOL METShouldLogDDPMessages() {
   NSTimeInterval _timeoutInterval;
 }
 
+- (instancetype)initWithRequest:(NSURLRequest *)request {
+    self = [super init];
+    if (self) {
+        _request = request;
+    }
+    return self;
+}
+
 - (instancetype)initWithServerURL:(NSURL *)serverURL {
   self = [super init];
   if (self) {
@@ -47,12 +55,14 @@ NS_INLINE BOOL METShouldLogDDPMessages() {
 }
 
 - (void)open {
-  NSLog(@"Connecting to DDP server at URL: %@", _serverURL);
-  
-  NSURLRequest *request = [NSURLRequest requestWithURL:_serverURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:_timeoutInterval];
-  _webSocket = [PSWebSocket clientSocketWithRequest:request];
-  _webSocket.delegate = self;
-  [_webSocket open];
+    NSLog(@"Connecting to DDP server at URL: %@", _serverURL);
+    
+    if (!_request) {
+        _request = [[NSMutableURLRequest alloc] initWithURL:_serverURL cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:_timeoutInterval];
+    }
+    _webSocket = [PSWebSocket clientSocketWithRequest:_request];
+    _webSocket.delegate = self;
+    [_webSocket open];
 }
 
 - (void)setDelegateQueue:(dispatch_queue_t)delegateQueue {
@@ -69,7 +79,7 @@ NS_INLINE BOOL METShouldLogDDPMessages() {
 }
 
 - (void)sendMessage:(NSDictionary *)message {
-  NSAssert(self.open, @"Attempting to send message without an open connection");
+ // NSAssert(self.open, @"Attempting to send message without an open connection");
   
   NSError *error;
   message = [message mutableCopy];
