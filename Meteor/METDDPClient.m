@@ -700,9 +700,12 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     NSLog(@"No reason specified in DDP error response");
     reason = error;
   }
+  NSArray *recoveryOptions = @[];
+  if (errorResponse[@"details"]) {
+    recoveryOptions = errorResponse[@"details"];
+  }
     
-  
-  return [NSError errorWithDomain:METDDPErrorDomain code:METDDPServerError userInfo:@{NSLocalizedDescriptionKey: @"Received error response from server", NSLocalizedFailureReasonErrorKey: reason}];
+  return [NSError errorWithDomain:METDDPErrorDomain code:METDDPServerError userInfo:@{NSLocalizedDescriptionKey: @"Received error response from server", NSLocalizedFailureReasonErrorKey: reason, NSLocalizedRecoveryOptionsErrorKey:recoveryOptions}];
 }
 
 @end
