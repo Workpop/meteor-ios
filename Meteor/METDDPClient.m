@@ -704,8 +704,10 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
   if (errorResponse[@"details"]) {
     recoveryOptions = errorResponse[@"details"];
   }
-    
-  return [NSError errorWithDomain:METDDPErrorDomain code:METDDPServerError userInfo:@{NSLocalizedDescriptionKey: @"Received error response from server", NSLocalizedFailureReasonErrorKey: reason, NSLocalizedRecoveryOptionsErrorKey:recoveryOptions}];
+  if (!error) {
+      error = @"";
+  }
+  return [NSError errorWithDomain:METDDPErrorDomain code:METDDPServerError userInfo:@{NSLocalizedDescriptionKey: @"Received error response from server", NSLocalizedFailureReasonErrorKey: reason, NSLocalizedRecoveryOptionsErrorKey:recoveryOptions, NSHelpAnchorErrorKey: error}];
 }
 
 @end
