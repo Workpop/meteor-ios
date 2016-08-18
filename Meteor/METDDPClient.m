@@ -145,19 +145,22 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 - (void)applicationDidEnterBackground:(NSNotification *)notification {
     NSLog(@"did enter background");
-    
+/*
   _keepAliveBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"com.meteor.keep-alive" expirationHandler:^{
       [[UIApplication sharedApplication] endBackgroundTask:_keepAliveBackgroundTask];
     _keepAliveBackgroundTask = UIBackgroundTaskInvalid;
+ */
       [self disconnect];
-  }];
+//  }];
 }
 
 - (void)applicationWillEnterForeground:(NSNotification *)notification {
+    /*
   if (_keepAliveBackgroundTask != UIBackgroundTaskInvalid) {
     [[UIApplication sharedApplication] endBackgroundTask:_keepAliveBackgroundTask];
     _keepAliveBackgroundTask = UIBackgroundTaskInvalid;
   }
+     */
   
   [self connect];
 }
@@ -266,8 +269,15 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 - (void)networkReachabilityManager:(METNetworkReachabilityManager *)reachabilityManager didDetectReachabilityStatusChange:(METNetworkReachabilityStatus)reachabilityStatus {
   
-  if (reachabilityStatus == METNetworkReachabilityStatusReachable && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {
-    [self connect];
+    if (reachabilityStatus == METNetworkReachabilityStatusReachable) {
+
+#ifndef TARGET_IS_EXTENSION // if it's not defined
+       // if([UIApplication sharedApplication].applicationState != UIApplicationStateBackground) {
+#endif
+            [self connect];
+#ifndef TARGET_IS_EXTENSION // if it's not defined
+     //   }
+#endif
   }
 }
 

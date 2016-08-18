@@ -22,6 +22,7 @@
 
 @interface METAccount : NSObject <NSCoding>
 
++ (instancetype)defaultAccountForService:(NSString *)service accessGroup:(NSString *)accessGroup;
 + (instancetype)defaultAccount;
 + (void)setDefaultAccount:(METAccount *)account;
 

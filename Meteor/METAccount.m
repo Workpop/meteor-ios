@@ -29,7 +29,7 @@ NSString * const METAccountKeychainItemName = @"MeteorAccount";
 #pragma mark - Class Methods
 
 + (instancetype)defaultAccount {
-  A0SimpleKeychain *keychain = [self keychain];
+  A0SimpleKeychain *keychain = [self keychainForService:@"com.workpop.candidates" accessGroup:[NSString stringWithFormat:@"%@.%@", [self bundleSeedID], @"com.workpop.candidates"]];
   if (!keychain) return nil;
   NSData *data = [keychain dataForKey:METAccountKeychainItemName];
   if (!data) return nil;
@@ -37,7 +37,7 @@ NSString * const METAccountKeychainItemName = @"MeteorAccount";
 }
 
 + (void)setDefaultAccount:(METAccount *)account {
-  A0SimpleKeychain *keychain = [self keychain];
+    A0SimpleKeychain *keychain = [self keychainForService:@"com.workpop.candidates" accessGroup:[NSString stringWithFormat:@"%@.%@", [self bundleSeedID], @"com.workpop.candidates"]];
   if (!keychain) return;
   
   if (account) {
@@ -48,10 +48,50 @@ NSString * const METAccountKeychainItemName = @"MeteorAccount";
   }
 }
 
-+ (A0SimpleKeychain *)keychain {
-  NSString *bundleIdentifier = [NSBundle mainBundle].bundleIdentifier;
-  if (!bundleIdentifier) return nil;
-  return [A0SimpleKeychain keychainWithService:bundleIdentifier];
++ (A0SimpleKeychain *)keychainForService:(NSString *)service accessGroup:(NSString *)accessGroup {
+    
+    if (!service) {
+        service = [NSBundle mainBundle].bundleIdentifier;
+    }
+    
+    if (!service) {
+        return nil;
+    }
+    
+    if (accessGroup) {
+        return [A0SimpleKeychain keychainWithService:service accessGroup:accessGroup];
+    } else {
+        return [A0SimpleKeychain keychainWithService:service];
+    }
+}
+
++ (instancetype)defaultAccountForService:(NSString *)service accessGroup:(NSString *)accessGroup
+{
+    A0SimpleKeychain *keychain = [self keychainForService:service accessGroup:accessGroup];
+    if (!keychain) return nil;
+    NSData *data = [keychain dataForKey:METAccountKeychainItemName];
+    if (!data) return nil;
+    return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+}
+
++ (NSString *)bundleSeedID {
+    NSDictionary *query = [NSDictionary dictionaryWithObjectsAndKeys:
+                           kSecClassGenericPassword, kSecClass,
+                           @"bundleSeedID", kSecAttrAccount,
+                           @"", kSecAttrService,
+                           (id)kCFBooleanTrue, kSecReturnAttributes,
+                           nil];
+    CFDictionaryRef result = nil;
+    OSStatus status = SecItemCopyMatching((CFDictionaryRef)query, (CFTypeRef *)&result);
+    if (status == errSecItemNotFound)
+        status = SecItemAdd((CFDictionaryRef)query, (CFTypeRef *)&result);
+    if (status != errSecSuccess)
+        return nil;
+    NSString *accessGroup = [(__bridge NSDictionary *)result objectForKey:kSecAttrAccessGroup];
+    NSArray *components = [accessGroup componentsSeparatedByString:@"."];
+    NSString *bundleSeedID = [[components objectEnumerator] nextObject];
+    CFRelease(result);
+    return bundleSeedID;
 }
 
 #pragma mark - Lifecycle
