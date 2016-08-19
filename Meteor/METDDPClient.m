@@ -123,8 +123,8 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
         
         _methodInvocationCoordinator = [[METMethodInvocationCoordinator alloc] initWithClient:self];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil]; //NS_EXTENSION_UNAVAILABLE_IOS("Use view controller based solutions where appropriate instead.");
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil]; //NS_EXTENSION_UNAVAILABLE_IOS("Use view controller based solutions where appropriate instead.");
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
     }
     return self;
 }
@@ -143,7 +143,6 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 #pragma mark - Application State Notifications
 
-//#if !(defined(__has_feature) && __has_feature(attribute_availability_app_extension))
 - (void)applicationDidEnterBackground:(NSNotification *)notification NS_EXTENSION_UNAVAILABLE_IOS("applicationDidEnterBackground not available in extension") {
     NSLog(@"did enter background");
     _keepAliveBackgroundTask = [[UIApplication sharedApplication] beginBackgroundTaskWithName:@"com.meteor.keep-alive" expirationHandler:^{
@@ -161,7 +160,6 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     
     [self connect];
 }
-//#endif
 
 #pragma mark - Connecting
 
@@ -265,15 +263,10 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 #pragma mark - METNetworkReachabilityManagerDelegate
 
-- (void)networkReachabilityManager:(METNetworkReachabilityManager *)reachabilityManager didDetectReachabilityStatusChange:(METNetworkReachabilityStatus)reachabilityStatus {
-    
-    //#if !(defined(__has_feature) && __has_feature(attribute_availability_app_extension))
-    //  if (reachabilityStatus == METNetworkReachabilityStatusReachable && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground)  {
-    //    [self connect];
-    //  }
-    //#else
-    //  [self connect];
-    //#endif
+- (void)networkReachabilityManager:(METNetworkReachabilityManager *)reachabilityManager didDetectReachabilityStatusChange:(METNetworkReachabilityStatus)reachabilityStatus NS_EXTENSION_UNAVAILABLE_IOS("networkReachabilityManager:reachabilityManager:didDetectReachabilityStatusChange not available in extension") {
+    if (reachabilityStatus == METNetworkReachabilityStatusReachable && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground)  {
+        [self connect];
+    }
 }
 
 #pragma mark - Message Handling
