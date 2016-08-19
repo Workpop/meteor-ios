@@ -123,8 +123,13 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
         
         _methodInvocationCoordinator = [[METMethodInvocationCoordinator alloc] initWithClient:self];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+        if ([self respondsToSelector:@selector(applicationDidEnterBackground:)]){
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidEnterBackground:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+        }
+        
+        if ([self respondsToSelector:@selector(applicationWillEnterForeground:)]){
+            [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationWillEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
+        }
     }
     return self;
 }
@@ -263,8 +268,19 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 #pragma mark - METNetworkReachabilityManagerDelegate
 
-- (void)networkReachabilityManager:(METNetworkReachabilityManager *)reachabilityManager didDetectReachabilityStatusChange:(METNetworkReachabilityStatus)reachabilityStatus NS_EXTENSION_UNAVAILABLE_IOS("networkReachabilityManager:reachabilityManager:didDetectReachabilityStatusChange not available in extension") {
-    if (reachabilityStatus == METNetworkReachabilityStatusReachable && [UIApplication sharedApplication].applicationState != UIApplicationStateBackground)  {
+- (void)networkReachabilityManager:(METNetworkReachabilityManager *)reachabilityManager didDetectReachabilityStatusChange:(METNetworkReachabilityStatus)reachabilityStatus {
+    if (reachabilityStatus == METNetworkReachabilityStatusReachable)  {
+        if ([self respondsToSelector:@selector(networkReachabilityManagerForStatus:)]){
+            [self connect];
+        } else {
+            [self connect]; // extension
+        }
+    }
+}
+
+- (BOOL)networkReachabilityManagerForStatus:(METNetworkReachabilityStatus)reachabilityStatus NS_EXTENSION_UNAVAILABLE_IOS("applicationDidEnterBackground not available in extension")
+{
+    if ([UIApplication sharedApplication].applicationState != UIApplicationStateBackground)  {
         [self connect];
     }
 }
