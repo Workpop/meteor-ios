@@ -24,12 +24,16 @@
 
 NSString * const METAccountKeychainItemName = @"MeteorAccount";
 
+// outside the implementation
+static NSString *keychainService;
+static NSString *keychainAccessGroup = nil;
+
 @implementation METAccount
 
 #pragma mark - Class Methods
 
 + (instancetype)defaultAccount {
-  A0SimpleKeychain *keychain = [self keychainForService:@"com.workpop.candidates" accessGroup:[NSString stringWithFormat:@"%@.%@", [self bundleSeedID], @"com.workpop.candidates"]];
+  A0SimpleKeychain *keychain = [self keychain];
   if (!keychain) return nil;
   NSData *data = [keychain dataForKey:METAccountKeychainItemName];
   if (!data) return nil;
@@ -37,7 +41,7 @@ NSString * const METAccountKeychainItemName = @"MeteorAccount";
 }
 
 + (void)setDefaultAccount:(METAccount *)account {
-    A0SimpleKeychain *keychain = [self keychainForService:@"com.workpop.candidates" accessGroup:[NSString stringWithFormat:@"%@.%@", [self bundleSeedID], @"com.workpop.candidates"]];
+  A0SimpleKeychain *keychain = [self keychain];
   if (!keychain) return;
   
   if (account) {
@@ -48,30 +52,41 @@ NSString * const METAccountKeychainItemName = @"MeteorAccount";
   }
 }
 
-+ (A0SimpleKeychain *)keychainForService:(NSString *)service accessGroup:(NSString *)accessGroup {
++ (A0SimpleKeychain *)keychain {
     
-    if (!service) {
-        service = [NSBundle mainBundle].bundleIdentifier;
-    }
-    
-    if (!service) {
+    if (!keychainService) {
         return nil;
     }
     
-    if (accessGroup) {
-        return [A0SimpleKeychain keychainWithService:service accessGroup:accessGroup];
+    if (keychainAccessGroup) {
+        return [A0SimpleKeychain keychainWithService:keychainService accessGroup:keychainAccessGroup];
     } else {
-        return [A0SimpleKeychain keychainWithService:service];
+        return [A0SimpleKeychain keychainWithService:keychainService];
     }
 }
 
-+ (instancetype)defaultAccountForService:(NSString *)service accessGroup:(NSString *)accessGroup
++ (NSString *)keychainService
 {
-    A0SimpleKeychain *keychain = [self keychainForService:service accessGroup:accessGroup];
-    if (!keychain) return nil;
-    NSData *data = [keychain dataForKey:METAccountKeychainItemName];
-    if (!data) return nil;
-    return [NSKeyedUnarchiver unarchiveObjectWithData:data];
+    if (!keychainService) {
+        [self setKeychainService:[NSBundle mainBundle].bundleIdentifier];
+    }
+    return keychainService;
+}
+
++ (void)setKeychainService:(NSString *)newKeychainService;
+{
+    keychainService = newKeychainService;
+}
+
+
++ (NSString *)keychainAccessGroup
+{
+    return keychainAccessGroup;
+}
+
++ (void)setKeychainAccessGroup:(NSString *)newKeychainAccessGroup;
+{
+    keychainAccessGroup = [NSString stringWithFormat:@"%@.%@", [self bundleSeedID], newKeychainAccessGroup];
 }
 
 + (NSString *)bundleSeedID {

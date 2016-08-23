@@ -22,9 +22,12 @@
 
 @interface METAccount : NSObject <NSCoding>
 
-+ (instancetype)defaultAccountForService:(NSString *)service accessGroup:(NSString *)accessGroup;
 + (instancetype)defaultAccount;
 + (void)setDefaultAccount:(METAccount *)account;
++ (NSString *)keychainService;
++ (void)setKeychainService:(NSString *)newKeychainService;
++ (NSString *)keychainAccessGroup;
++ (void)setKeychainAccessGroup:(NSString *)newKeychainAccessGroup;
 
 - (instancetype)initWithUserID:(NSString *)userID resumeToken:(NSString *)token expiryDate:(NSDate *)tokenExpires NS_DESIGNATED_INITIALIZER;
 - (instancetype)init __attribute__((unavailable("Use -initWithUserID:resumeToken:expiryDate: instead")));
