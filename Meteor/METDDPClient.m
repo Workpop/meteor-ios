@@ -278,7 +278,7 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     }
 }
 
-- (BOOL)networkReachabilityManagerForStatus:(METNetworkReachabilityStatus)reachabilityStatus NS_EXTENSION_UNAVAILABLE_IOS("applicationDidEnterBackground not available in extension")
+- (void)networkReachabilityManagerForStatus:(METNetworkReachabilityStatus)reachabilityStatus NS_EXTENSION_UNAVAILABLE_IOS("applicationDidEnterBackground not available in extension")
 {
     if ([UIApplication sharedApplication].applicationState != UIApplicationStateBackground)  {
         [self connect];
