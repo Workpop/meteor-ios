@@ -48,6 +48,10 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 @property (nonatomic, copy) void (^pendingLoginResumeHandler)();
 
+#ifdef DEBUG
+@property (nonatomic, strong) NSString *debugString;
+#endif
+
 @end
 
 @implementation METDDPClient {
@@ -296,7 +300,11 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     
     // Ignore deprecated welcome message
     if (messageType.length == 0) return;
-    
+
+#ifdef DEBUG
+    NSLog(@"message %@", message);
+#endif
+
     if ([messageType isEqualToString:@"connected"]) {
         [self didReceiveConnectedMessage:message];
     } else if ([messageType isEqualToString:@"failed"]) {
@@ -311,14 +319,33 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
         [self didReceiveNoSubMessage:message];
     } else if ([messageType isEqualToString:@"added"]) {
         [self didReceiveAddedMessage:message];
+#ifdef DEBUG
+        self.debugString = [self.debugString stringByAppendingString:[NSString stringWithFormat:@"%@", message]];
+#endif
     } else if ([messageType isEqualToString:@"changed"]) {
         [self didReceiveChangedMessage:message];
+
+#ifdef DEBUG
+        self.debugString = [self.debugString stringByAppendingString:[NSString stringWithFormat:@"%@", message]];
+#endif
     } else if ([messageType isEqualToString:@"removed"]) {
         [self didReceiveRemovedMessage:message];
+#ifdef DEBUG
+        self.debugString = [self.debugString stringByAppendingString:[NSString stringWithFormat:@"%@", message]];
+#endif
     } else if ([messageType isEqualToString:@"ready"]) {
         [self didReceiveReadyMessage:message];
+#ifdef DEBUG
+        NSUInteger bytes = [self.debugString lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        NSLog(@"%@ : %i bytes", message[@"msg"], bytes);
+        self.debugString = @"";
+#endif
     } else if ([messageType isEqualToString:@"result"]) {
         [self didReceiveResultMessage:message];
+#ifdef DEBUG
+        NSUInteger bytes = [[NSString stringWithFormat:@"%@", message] lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
+        NSLog(@"%@ : %i bytes", message[@"msg"], bytes);
+#endif
     } else if ([messageType isEqualToString:@"updated"]) {
         [self didReceiveUpdatedMessage:message];
     } else {
