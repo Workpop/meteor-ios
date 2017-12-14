@@ -644,6 +644,14 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 }
 
 - (void)loginWithMethodName:(NSString *)methodName parameters:(NSArray *)parameters completionHandler:(METMethodCompletionHandler)completionHandler {
+
+    if ([self.delegate respondsToSelector:@selector(loginOptionParameters)]) {
+        NSArray *loginOptionParameters = [self.delegate loginOptionParameters];
+        NSMutableArray *params = [parameters mutableCopy];
+        [params addObjectsFromArray:loginOptionParameters];
+        parameters = params;
+    }
+
     self.loggingIn = YES;
     __block BOOL reconnected = NO;
     __weak METDDPClient *weakSelf = self;
