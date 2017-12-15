@@ -43,6 +43,8 @@ NSString * const METDDPErrorDomain = @"com.meteor.DDPClient.ErrorDomain";
 
 NSString * const METDDPClientDidChangeConnectionStatusNotification = @"METDDPClientDidChangeConnectionStatusNotification";
 NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidChangeAccountNotification";
+NSString * const METDDPClientDidFailLoginNotification = @"METDDPClientDidFailLoginNotification";
+NSString * const METDDPClientDidLogoutNotification = @"METDDPClientDidLogoutNotification";
 
 @interface METDDPClient ()
 
@@ -683,16 +685,23 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
     __block BOOL reconnected = NO;
     __weak METDDPClient *weakSelf = self;
     [self callMethodWithName:methodName parameters:parameters options:METMethodCallOptionsBarrier receivedResultHandler:^(id result, NSError *error) {
-        self.pendingLoginResumeHandler = ^{
-            reconnected = YES;
-            NSString *resumeToken = result[@"token"];
-            [weakSelf loginWithResumeToken:resumeToken completionHandler:completionHandler];
-        };
+        if (!error) {
+            self.pendingLoginResumeHandler = ^{
+                reconnected = YES;
+                NSString *resumeToken = result[@"token"];
+                [weakSelf loginWithResumeToken:resumeToken completionHandler:completionHandler];
+            };
+        }
     } completionHandler:^(id result, NSError *error) {
+        if (error) {
+            [[NSNotificationCenter defaultCenter] postNotificationName:METDDPClientDidFailLoginNotification object:self userInfo:nil];
+        }
+
         if (reconnected) return;
-        
+
         _pendingLoginResumeHandler = nil;
         self.loggingIn = NO;
+
         self.account = [self accountFromLoginMethodResult:result];
         if (completionHandler) {
             completionHandler(result, error);
@@ -721,6 +730,7 @@ NSString * const METDDPClientDidChangeAccountNotification = @"METDDPClientDidCha
 
 - (void)logoutWithCompletionHandler:(METLogOutCompletionHandler)completionHandler {
     [self callMethodWithName:@"logout" parameters:nil options:METMethodCallOptionsBarrier completionHandler:^(id result, NSError *error) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:METDDPClientDidLogoutNotification object:self userInfo:nil];
         self.account = nil;
         if (completionHandler) {
             completionHandler(error);
