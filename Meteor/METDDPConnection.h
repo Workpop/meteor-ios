@@ -49,5 +49,7 @@
 - (void)connection:(METDDPConnection *)connection didReceiveMessage:(NSDictionary *)message;
 - (void)connection:(METDDPConnection *)connection didFailWithError:(NSError *)error;
 - (void)connectionDidClose:(METDDPConnection *)connection;
+@optional
+- (BOOL)connectionEvaluateServerTrust:(SecTrustRef)trust;
 
 @end

@@ -426,6 +426,13 @@ NSString * const METDDPClientDidLogoutNotification = @"METDDPClientDidLogoutNoti
     }
 }
 
+- (BOOL)connectionEvaluateServerTrust:(SecTrustRef)trust {
+    if ([_delegate respondsToSelector:@selector(clientEvaluateServerTrust:)]) {
+        return [_delegate clientEvaluateServerTrust:trust];
+    }
+    return kSecTrustResultProceed;
+}
+
 - (void)didReceiveFailedMessage:(NSDictionary *)message {
     NSString *suggestedProtocolVersion = message[@"version"];
     if ([_supportedProtocolVersions containsObject:suggestedProtocolVersion]) {

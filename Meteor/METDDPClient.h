@@ -93,5 +93,6 @@ typedef void (^METLogOutCompletionHandler)(NSError *error);
 - (void)clientDidEstablishConnection:(METDDPClient *)client;
 - (void)client:(METDDPClient *)client didFailWithError:(NSError *)error;
 - (NSArray *)loginOptionParameters;
+- (BOOL)clientEvaluateServerTrust:(SecTrustRef)trust;
 
 @end

@@ -128,6 +128,13 @@ NS_INLINE BOOL METShouldLogDDPMessages() {
   [_delegate connectionDidClose:self];
 }
 
+- (BOOL)webSocket:(PSWebSocket *)webSocket evaluateServerTrust:(SecTrustRef)trust {
+    if ([_delegate respondsToSelector:@selector(connectionEvaluateServerTrust:)]) {
+        return [_delegate connectionEvaluateServerTrust:trust];
+    }
+    return kSecTrustResultProceed;
+}
+
 #pragma mark - EJSON
 
 - (void)convertTypesFromEJSONForMessage:(NSMutableDictionary *)message {
